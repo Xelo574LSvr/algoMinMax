@@ -156,19 +156,17 @@ class MorpionHeuristique:
         # x x .
         # . o .
         # . . .
-        b1 = ['x', 'x', ' ', ' ', 'o', ' ', ' ', ' ', ' ']
+        b1 = ['x', 'x', 'o', ' ', 'o', ' ', ' ', ' ', ' ']
         print(f"Grille 1 : {self.afficher_grille(b1)}")
         print(f"Score calculé : {self.evaluer_etat(b1)}")
-        print("Analyse : +10 (ligne haut) + 1 (colonne gauche) - 1 (centre) = +10 environ\n")
 
         # SCÉNARIO 2 : Avantage MIN (Deux O alignés + Un O isolé)
         # o o .
         # . x .
         # . . o
-        b2 = ['o', 'o', ' ', ' ', 'x', ' ', ' ', ' ', 'o']
+        b2 = ['o', ' ', 'x', 'x', 'x', 'o', ' ', 'o', 'o']
         print(f"Grille 2 : {self.afficher_grille(b2)}")
         print(f"Score calculé : {self.evaluer_etat(b2)}")
-        print("Analyse : Doit être négatif (avantage Rouge)\n")
 
         # SCÉNARIO 3 : Équilibre parfait
         # x . .
@@ -177,7 +175,6 @@ class MorpionHeuristique:
         b3 = ['x', 'x', 'x', ' ', 'o', 'o', ' ', ' ', ' ']
         print(f"Grille 3 : {self.afficher_grille(b3)}")
         print(f"Score calculé : {self.evaluer_etat(b3)}")
-        print("Analyse : +1 pour X, -1 pour O. Total attendu = 0\n")
 
 if __name__ == "__main__":
     app = MorpionHeuristique()
