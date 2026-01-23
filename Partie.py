@@ -18,7 +18,6 @@ class Partie:
 
     def choixJoueurDepart(self):
         entier = random.randint(1, 100)
-        print(entier)
         if entier <= 50:
             self.__isTourJoueur1 = True
         else:
@@ -34,13 +33,15 @@ class Partie:
         print("Vous allez démarrer une partie de Morpion")
         print()
 
-        print("Voici les différents modes de jeux que vous pouvez lancer :")
-        print("1 : joueur contre ordinateur")
-        print("2 : ordinateur contre ordinateur")
-        print()
+        choixModeJeu = 0
+        while choixModeJeu != "1" and choixModeJeu != "2":
+            print("Voici les différents modes de jeux que vous pouvez lancer :")
+            print("1 : joueur contre ordinateur")
+            print("2 : ordinateur contre ordinateur")
+            print()
 
-        print("Veuillez choisir le mode de jeu : (ne taper que le numéro du mode de jeu)")
-        choixModeJeu = input()
+            print("Veuillez choisir le mode de jeu : (ne taper que le numéro du mode de jeu)")
+            choixModeJeu = input()
 
         self.choixJoueurDepart()
 
@@ -56,16 +57,14 @@ class Partie:
         # Remise du tour du joueur initial
         self.changerTourJoueur()
 
-        if self.__joueur1:
+        if isinstance(self.__joueur1, Joueur):
             print(f"Joueur 1 : {self.__joueur1.nom} ({self.__joueur1.forme})")
+        else:
+            print(f"Joueur 1 : Ordinateur ({self.__joueur1.forme})")
 
-        if self.__joueur2:
-            print(f"Joueur 2 : {self.__joueur2} ({self.__joueur2.forme})")
+        print(f"Joueur 2 : Ordinateur ({self.__joueur2.forme})")
 
         print("\nDébut de la partie !")
-
-        print("\nLe premier joueur est ")
-        print(self.__isTourJoueur1)
 
         self.reinitialiserGrille()
         self.afficherEtatPartie()
