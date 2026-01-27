@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 import time
-from Partie import Partie  # Importation de la classe gérant la logique du jeu (le cerveau)
+from Partie import Partie  
 
 class MorpionInterface:
     """
