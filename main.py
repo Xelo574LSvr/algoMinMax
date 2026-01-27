@@ -1,5 +1,5 @@
-from Partie import Partie
+from interface import MorpionInterface
 
 if __name__ == "__main__":
-    jeu = Partie()
-    jeu.lancementPartie()
+    # On lance l'application directement
+    app = MorpionInterface()
