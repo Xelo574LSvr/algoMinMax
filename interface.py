@@ -5,7 +5,7 @@ from Partie import Partie
 
 class MorpionInterface:
     """
-    Classe principale gérant l'Interface Graphique (GUI) du jeu Morpion.
+    Classe principale gérant l'Interface Graphique (GUI) du jeu Tic Tac Toe.
     Elle fait le lien entre l'utilisateur (clics, affichage) et la logique interne (Partie).
     """
 
