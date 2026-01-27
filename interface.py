@@ -11,34 +11,19 @@ class MorpionInterface:
 
     def __init__(self):
         # 1. Création de la fenêtre racine (root)
-        # C'est la base de toute application Tkinter. Elle contient tous les autres widgets.
         self.root = tk.Tk()
         
         # 2. Instanciation de la logique du jeu
-        # On crée un objet 'Partie' qui gardera en mémoire l'état de la grille (données).
         self.jeu = Partie()
         self.mode_actuel = None  # Variable pour savoir si on joue "Joueur vs IA" (1) ou "IA vs IA" (2)
         
-        # --- Configuration de la fenêtre (Centrage Dynamique) ---
+        # --- Configuration de la fenêtre ---
         self.root.title("Tic Tac Toe - 2026")  # Titre de la fenêtre
         
-        # Définition des dimensions souhaitées pour l'application
-        largeur_fenetre = 600
-        hauteur_fenetre = 800
+        # C'est ici que ça devient simple : une seule ligne pour tout gérer
+        self.centrer_fenetre(600, 800)
         
-        # Récupération des dimensions réelles de l'écran de l'utilisateur
-        largeur_ecran = self.root.winfo_screenwidth()
-        hauteur_ecran = self.root.winfo_screenheight()
-        
-        # Calcul mathématique pour trouver le point (x, y) du coin supérieur gauche
-        # afin que la fenêtre soit parfaitement centrée.
-        pos_x = (largeur_ecran // 2) - (largeur_fenetre // 2)
-        pos_y = (hauteur_ecran // 2) - (hauteur_fenetre // 2)
-        
-        # Application de la géométrie : format "LargeurxHauteur+PositionX+PositionY"
-        self.root.geometry(f"{largeur_fenetre}x{hauteur_fenetre}+{pos_x}+{pos_y}")
-        
-        # On empêche le redimensionnement pour éviter de casser le design (responsive design limité)
+        # On empêche le redimensionnement pour éviter de casser le design 
         self.root.resizable(False, False)
         
         # Couleur de fond globale de la fenêtre (Bleu nuit)
@@ -268,3 +253,12 @@ class MorpionInterface:
         # Bouton Quitter : Ferme complètement l'application
         tk.Button(popup, text="❌ QUITTER LE JEU", bg="#e74c3c", fg="white",
                   command=self.root.destroy, **btn_pop).pack(pady=5)
+        
+    # --- FONCTION UTILITAIRE DE CENTRAGE ---
+    def centrer_fenetre(self, w, h):
+        """Calcule proprement la position centrale"""
+        ecran_w = self.root.winfo_screenwidth()
+        ecran_h = self.root.winfo_screenheight()
+        x = (ecran_w // 2) - (w // 2)
+        y = (ecran_h // 2) - (h // 2)
+        self.root.geometry(f"{w}x{h}+{x}+{y}")
