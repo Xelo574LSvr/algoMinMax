@@ -1,7 +1,7 @@
 import random
 from Ordinateur import Ordinateur
 from Joueur import Joueur
-from Evaluation import Evaluation  # Important : Importer l'IA
+from Evaluation import Evaluation
 
 
 class Partie:
