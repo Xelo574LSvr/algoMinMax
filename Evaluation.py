@@ -78,7 +78,7 @@ class Evaluation:
 
         coups_possibles = [i for i, x in enumerate(board) if x == ' ']
 
-        # Petit feedback console optionnel
+        # Petit message console optionnel
         # print(f"L'IA ({self.MAX_PLAYER}) réfléchit ({len(coups_possibles)} options)...")
 
         for coup in coups_possibles:
