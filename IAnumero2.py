@@ -2,20 +2,10 @@ import sys
 
 
 class MorpionAlphaBeta:
-    def __init__(self):
-        self.MIN_PLAYER = 'o'
-        self.MAX_PLAYER = 'x'
-        self.ICO = {'x': '❌', 'o': '🔴', ' ': '⬜'}
+    def __init__(self, ai_player, human_player):
+        self.MAX_PLAYER = ai_player
+        self.MIN_PLAYER = human_player
 
-        # Identités (définies au lancement)
-        self.ia_symbol = 'x'
-        self.humain_symbol = 'o'
-
-    def afficher_grille(self, board):
-        b = [self.ICO[c] for c in board]
-        print(f"\n  {b[0]} {b[1]} {b[2]}")
-        print(f"  {b[3]} {b[4]} {b[5]}")
-        print(f"  {b[6]} {b[7]} {b[8]}\n")
 
     def est_plein(self, board):
         return ' ' not in board
@@ -95,7 +85,7 @@ class MorpionAlphaBeta:
 
         for coup in coups_possibles:
             board[coup] = self.MAX_PLAYER
-            score = self.minimax(board, 0, False, 1)
+            score = self.minimax(board, 9, False, 9)
             board[coup] = ' '
 
             if score > meilleur_score:
@@ -103,54 +93,3 @@ class MorpionAlphaBeta:
                 meilleur_coup = coup
 
         return meilleur_coup
-
-    def choisir_camp(self):
-        print("\n--- MODE COMPÉTITION (IA INVINCIBLE) ---")
-        print("Qui commence ?")
-        print("1. Moi (Je joue les X)")
-        print("2. L'IA (Elle joue les X)")
-        while True:
-            c = input("Choix : ")
-            if c == '1':
-                self.humain_symbol = 'x';
-                self.ia_symbol = 'o'
-                return False
-            elif c == '2':
-                self.humain_symbol = 'o';
-                self.ia_symbol = 'x'
-                return True
-
-    def jouer(self):
-        tour_ia = self.choisir_camp()
-        board = [' '] * 9
-
-        while True:
-            self.afficher_grille(board)
-
-            # Vérifs Fin
-            eval_finale = self.evaluer_etat(board)
-            if eval_finale == 1000: print("🤖 L'IA A GAGNÉ !"); break
-            if eval_finale == -1000: print("👏 TU AS GAGNÉ !"); break  # (Impossible théoriquement)
-            if self.est_plein(board): print("🤝 MATCH NUL !"); break
-
-            if tour_ia:
-                coup = self.trouver_meilleur_coup(board)
-                board[coup] = self.ia_symbol
-                print(f"L'IA joue en {coup}")
-            else:
-                while True:
-                    try:
-                        case = int(input(f"Ton coup ({self.ICO[self.humain_symbol]}) : "))
-                        if 0 <= case <= 8 and board[case] == ' ':
-                            board[case] = self.humain_symbol
-                            break
-                    except:
-                        pass
-
-            tour_ia = not tour_ia
-
-
-if __name__ == "__main__":
-    # On lance directement la version invincible
-    jeu = MorpionAlphaBeta()
-    jeu.jouer()

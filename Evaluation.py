@@ -83,7 +83,7 @@ class Evaluation:
 
         for coup in coups_possibles:
             board[coup] = self.MAX_PLAYER
-            score = self.minimax(board, 0, False, 1)
+            score = self.minimax(board, 9, False, 9)
             board[coup] = ' '
 
             if score > meilleur_score:

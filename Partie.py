@@ -1,4 +1,5 @@
 from Evaluation import Evaluation
+from IAnumero2 import MorpionAlphaBeta
 import random
 
 class Partie:
@@ -31,13 +32,17 @@ class Partie:
                 return True
         return False
 
-    def jouer_coup_ia(self, symbole_ia, symbole_adversaire):
+    def jouer_coup_ia(self, symbole_ia, symbole_adversaire, type_ia = 1):
         """Demande à l'IA de calculer et jouer le meilleur coup"""
         # 1. Conversion grille 2D -> 1D pour l'IA
         flat_board = [case for ligne in self.__grille for case in ligne]
+
+        # CHOIX DU CERVEAU SELON LE PARAMÈTRE
+        if type_ia == 2:
+            cerveau = MorpionAlphaBeta(ai_player=symbole_ia, human_player=symbole_adversaire)
+        else:
+            cerveau = Evaluation(ai_player=symbole_ia, human_player=symbole_adversaire)
         
-        # 2. Appel de l'algorithme
-        cerveau = Evaluation(ai_player=symbole_ia, human_player=symbole_adversaire)
         index = cerveau.trouver_meilleur_coup(flat_board)
         
         # 3. Application du coup

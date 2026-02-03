@@ -228,7 +228,7 @@ class MorpionInterface:
     def jouer_tour_ia_vs_humain(self):
         """Demande à l'IA de calculer et jouer son coup."""
         # On appelle l'IA via la classe Partie
-        coord = self.jeu.jouer_coup_ia(self.symbole_ia, self.symbole_humain)
+        coord = self.jeu.jouer_coup_ia(self.symbole_ia, self.symbole_humain, type_ia=1)
         
         if coord:
             r, c = coord
@@ -254,18 +254,20 @@ class MorpionInterface:
         # On détermine qui joue (X ou O)
         joueur_courant = self.tour_ia_vs_ia
         joueur_adverse = "O" if joueur_courant == "X" else "X"
+
+        type_ia_a_utiliser = 1 if joueur_courant == "X" else 2
         
         # Mise à jour texte
         nom_ia = self.nom_ia_x if joueur_courant == "X" else self.nom_ia_o
         col = self.color_accent if joueur_courant == "X" else self.color_ia
         self.label_status.config(text=f"{nom_ia} ({joueur_courant}) réfléchit...", fg=col)
-        
-        # Calcul du coup
-        cerveau = Evaluation(ai_player=joueur_courant, human_player=joueur_adverse)
-        idx = cerveau.trouver_meilleur_coup(flat_board)
 
-        if idx != -1:
-            r, c = idx // 3, idx % 3
+        # On passe le type d'IA à la méthode
+        coord = self.jeu.jouer_coup_ia(joueur_courant, joueur_adverse, type_ia=type_ia_a_utiliser)
+        
+
+        if coord:
+            r, c = coord
             self.jeu.jouer_coup(r, c, joueur_courant)
             self.boutons[r][c].config(text=joueur_courant, fg=col)
             
