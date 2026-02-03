@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox
 import time
-from Partie import Partie  
+from Partie import Partie
+from Evaluation import Evaluation  # On importe l'IA
 
 class MorpionInterface:
     """
     Classe principale gérant l'Interface Graphique (GUI) du jeu Tic Tac Toe.
-    Elle fait le lien entre l'utilisateur (clics, affichage) et la logique interne (Partie).
+    Elle fait le lien entre l'utilisateur (clics, affichage), la logique (Partie) et l'IA (Evaluation).
     """
 
     def __init__(self):
@@ -15,25 +16,25 @@ class MorpionInterface:
         
         # 2. Instanciation de la logique du jeu
         self.jeu = Partie()
-        self.mode_actuel = None  # Variable pour savoir si on joue "Joueur vs IA" (1) ou "IA vs IA" (2)
+        self.mode_actuel = None  # 1 = Joueur vs IA, 2 = IA vs IA
+        self.tour_ia_vs_ia = "X" # Pour savoir quelle IA doit jouer en mode 2
         
         # --- Configuration de la fenêtre ---
-        self.root.title("Tic Tac Toe - 2026")  # Titre de la fenêtre
+        self.root.title("Tic Tac Toe - 2026")
         
-        # C'est ici que ça devient simple : une seule ligne pour tout gérer
+        # Centrage de la fenêtre (600x800)
         self.centrer_fenetre(600, 800)
         
-        # On empêche le redimensionnement pour éviter de casser le design 
+        # On empêche le redimensionnement pour conserver le design
         self.root.resizable(False, False)
         
-        # Couleur de fond globale de la fenêtre (Bleu nuit)
+        # Couleur de fond globale (Bleu nuit)
         self.root.configure(bg="#2c3e50")
         
         # --- Définition de la Charte Graphique (Styles) ---
-        # On stocke les couleurs et polices dans des variables pour faciliter les modifications futures
         self.color_bg = "#2c3e50"       # Fond principal
-        self.color_accent = "#1abc9c"   # Vert Émeraude (Actions principales / Joueur)
-        self.color_ia = "#3498db"       # Bleu (Actions de l'ordinateur)
+        self.color_accent = "#1abc9c"   # Vert Émeraude (Joueur / X)
+        self.color_ia = "#3498db"       # Bleu (IA / O)
         self.color_txt = "#ecf0f1"      # Blanc cassé (Texte)
         
         # Polices d'écriture
@@ -42,221 +43,235 @@ class MorpionInterface:
         self.font_button = ("Helvetica", 14, "bold")
         
         # --- Création du Conteneur Principal ---
-        # On utilise une Frame qui prend toute la place pour y déposer nos pages (Menu, Jeu, etc.)
         self.frame_principale = tk.Frame(self.root, bg=self.color_bg)
         self.frame_principale.pack(expand=True, fill="both")
         
-        # Lancement de la première vue : Le Menu
+        # Lancement du Menu
         self.afficher_menu()
         
-        # 3. Lancement de la boucle événementielle (Main Loop)
-        # C'est ce qui maintient la fenêtre ouverte et attend les clics de souris.
-        # Le programme reste bloqué ici tant qu'on ne ferme pas la fenêtre.
+        # 3. Lancement de la boucle événementielle
         self.root.mainloop()
 
     def nettoyer_interface(self):
-        """
-        Supprime tous les widgets présents dans la frame principale.
-        Utile pour passer d'une page à l'autre (ex: du Menu vers le Jeu) sans superposer les éléments.
-        """
+        """Supprime tous les widgets de la frame principale pour changer de page."""
         for widget in self.frame_principale.winfo_children():
             widget.destroy()
 
     def afficher_menu(self):
-        """
-        Affiche la page d'accueil avec les boutons de sélection de mode.
-        """
+        """Affiche le menu principal."""
         self.nettoyer_interface()
         
-        # Création d'un conteneur invisible pour centrer le contenu verticalement et horizontalement
         menu_container = tk.Frame(self.frame_principale, bg=self.color_bg)
-        # 'place' permet un positionnement absolu ou relatif. Ici, on place le centre du frame (anchor="center")
-        # à 50% de la largeur (relx=0.5) et 50% de la hauteur (rely=0.5) du parent.
         menu_container.place(relx=0.5, rely=0.5, anchor="center")
         
-        # Titre du jeu
         tk.Label(menu_container, text="MORPION", font=self.font_titre, 
                  fg="white", bg=self.color_bg).pack(pady=(0, 50))
         
-        # Dictionnaire de style pour uniformiser les boutons du menu
         btn_style = {"font": self.font_button, "bg": self.color_accent, "fg": "white", 
                      "width": 25, "height": 2, "bd": 0, "cursor": "hand2", "activebackground": "#16a085"}
         
-        # Bouton Mode 1 : Joueur vs IA
         tk.Button(menu_container, text="JOUEUR VS ORDINATEUR", 
                   command=self.setup_joueur_vs_ia, **btn_style).pack(pady=15)
         
-        # Bouton Mode 2 : IA vs IA
         tk.Button(menu_container, text="ORDINATEUR VS ORDINATEUR", 
                   command=self.setup_ia_vs_ia, **btn_style).pack(pady=15)
 
     def setup_joueur_vs_ia(self):
-        """
-        Écran de configuration pour le Mode 1 (Saisie du pseudo).
-        """
+        """Configuration Mode 1 : Saisie du pseudo."""
         self.mode_actuel = 1
         self.nettoyer_interface()
         
-        # Conteneur centré pour le formulaire
         setup_container = tk.Frame(self.frame_principale, bg=self.color_bg)
         setup_container.place(relx=0.5, rely=0.5, anchor="center")
         
-        # Labels d'instructions
         tk.Label(setup_container, text="PRÉPAREZ-VOUS", font=("Helvetica", 12, "bold"),
                  fg=self.color_accent, bg=self.color_bg).pack()
         
         tk.Label(setup_container, text="Votre Pseudo", font=("Helvetica", 28, "bold"), 
                  fg="white", bg=self.color_bg).pack(pady=(5, 30))
         
-        # Champ de saisie (Entry) stylisé avec une bordure colorée
         self.entry_pseudo = tk.Entry(setup_container, font=("Helvetica", 22), 
                                      justify="center", bd=0, highlightthickness=3,
                                      highlightbackground="#34495e", highlightcolor=self.color_accent)
-        self.entry_pseudo.pack(pady=10, ipady=10) # ipady augmente la hauteur interne du champ
-        self.entry_pseudo.insert(0, "Joueur 1")   # Valeur par défaut
-        self.entry_pseudo.focus_set()             # Donne le focus clavier directement au champ
+        self.entry_pseudo.pack(pady=10, ipady=10)
+        self.entry_pseudo.insert(0, "Joueur 1")
+        self.entry_pseudo.focus_set()
         
-        # Bouton pour lancer la partie
         tk.Button(setup_container, text="LANCER LE MATCH", font=self.font_button, 
                   bg=self.color_accent, fg="white", width=20, height=2, bd=0,
                   command=self.lancer_jeu, cursor="hand2").pack(pady=40)
 
     def setup_ia_vs_ia(self):
-        """
-        Configuration pour le Mode 2. Pas de saisie de pseudo nécessaire.
-        """
+        """Configuration Mode 2 : Lancement direct."""
         self.mode_actuel = 2
-        # On crée un faux objet 'entry_pseudo' avec une méthode 'get' pour simuler la saisie d'un nom
-        # Cela permet de réutiliser la méthode 'lancer_jeu' sans modification.
         self.entry_pseudo = type('obj', (object,), {'get': lambda: "IA Alpha"})()
-        
-        # On lance l'affichage de la grille
         self.lancer_jeu()
-        
-        # On programme le début de la simulation IA après 1 seconde (1000 ms) pour ne pas être trop brutal
+        # On attend 1s avant de lancer la boucle des IA
         self.root.after(1000, self.boucle_ia_vs_ia)
 
     def lancer_jeu(self):
-        """
-        Initialise l'affichage de la grille de jeu (3x3).
-        """
-        # Récupération du nom du joueur (ou de l'IA selon le mode)
+        """Initialisation de la grille graphique et logique."""
         self.nom_joueur = self.entry_pseudo.get()
         
-        # Réinitialisation des données logiques (dans la classe Partie)
+        # Réinit logique
         self.jeu.reinitialiserGrille()
+        self.tour_ia_vs_ia = "X" # Reset du tour IA
+        
         self.nettoyer_interface()
         
-        # Conteneur centré pour le jeu
         game_container = tk.Frame(self.frame_principale, bg=self.color_bg)
         game_container.place(relx=0.5, rely=0.5, anchor="center")
         
-        # Label d'état (qui joue ?) - Dynamique
+        # Label d'état
         self.label_status = tk.Label(game_container, text=f"Au tour de : {self.nom_joueur}", 
                                      font=self.font_status, fg=self.color_accent, bg=self.color_bg)
         self.label_status.pack(pady=(0, 40))
         
-        # Frame spécifique pour la grille (fond plus sombre)
+        # Grille
         self.grille_frame = tk.Frame(game_container, bg="#34495e", padx=10, pady=10)
         self.grille_frame.pack()
         
-        # Création de la matrice de boutons (3x3)
         self.boutons = []
-        for r in range(3): # Boucle pour les lignes (row)
+        for r in range(3):
             ligne = []
-            for c in range(3): # Boucle pour les colonnes (column)
-                # Création d'un bouton pour chaque case
+            for c in range(3):
                 btn = tk.Button(self.grille_frame, text=" ", font=("Helvetica", 45, "bold"), 
                                 width=4, height=1, bg="white", fg=self.color_bg,
                                 activebackground="#ecf0f1", bd=0, relief="flat",
-                                # On utilise lambda pour passer les coordonnées r et c à la fonction lors du clic
                                 command=lambda r=r, c=c: self.clic_sur_case(r, c))
-                # Placement en grille
                 btn.grid(row=r, column=c, padx=5, pady=5)
                 ligne.append(btn)
             self.boutons.append(ligne)
 
+    # --- LOGIQUE DE JEU ET IA ---
+
+    def verifier_fin_partie(self):
+        """Vérifie si quelqu'un a gagné ou s'il y a match nul."""
+        # On vérifie les victoires X et O
+        if self.jeu.verifier_victoire("X"):
+            gagnant = self.nom_joueur if self.mode_actuel == 1 else "IA Alpha (X)"
+            self.afficher_popup_fin(f"VICTOIRE !\n{gagnant}")
+            return True
+        
+        if self.jeu.verifier_victoire("O"):
+            gagnant = "Ordinateur (O)" if self.mode_actuel == 1 else "IA Beta (O)"
+            self.afficher_popup_fin(f"VICTOIRE !\n{gagnant}")
+            return True
+            
+        # Match nul ? (si la grille est pleine)
+        flat_board = [c for row in self.jeu.get_grille() for c in row]
+        if " " not in flat_board:
+            self.afficher_popup_fin("MATCH NUL !")
+            return True
+            
+        return False
+
     def clic_sur_case(self, r, c):
-        """
-        Gestionnaire d'événement : Appelé quand l'utilisateur clique sur une case (Mode 1).
-        """
+        """Action du Joueur Humain (Mode 1)."""
         if self.mode_actuel == 1:
-            # Vérifie si la case est vide avant de jouer
-            if self.boutons[r][c]["text"] == " ":
-                # Mise à jour visuelle pour le joueur (X rouge)
-                self.boutons[r][c].config(text="X", fg="#e74c3c")
+            grille = self.jeu.get_grille()
+            
+            # Si la case est vide
+            if grille[r][c] == " ":
+                # 1. Action Joueur (X)
+                grille[r][c] = "X"
+                self.boutons[r][c].config(text="X", fg=self.color_accent)
                 
-                # Changement du message de statut
-                self.label_status.config(text="Au tour de : Ordinateur", fg=self.color_ia)
+                # Vérif fin
+                if self.verifier_fin_partie(): return
                 
-                # TODO: Ici, il faudra appeler la logique de l'ordinateur pour qu'il réponde.
+                # 2. Tour de l'IA (O)
+                self.label_status.config(text="L'IA réfléchit...", fg=self.color_ia)
+                self.root.after(500, self.jouer_tour_ia_vs_humain)
+
+    def jouer_tour_ia_vs_humain(self):
+        """L'IA (O) joue contre l'Humain (X)."""
+        grille = self.jeu.get_grille()
+        flat_board = [c for row in grille for c in row]
+        
+        # L'IA est O (Max), Humain est X (Min)
+        cerveau = Evaluation(ai_player="O", human_player="X")
+        idx = cerveau.trouver_meilleur_coup(flat_board)
+        
+        if idx != -1:
+            r, c = idx // 3, idx % 3
+            grille[r][c] = "O"
+            self.boutons[r][c].config(text="O", fg=self.color_ia)
+            self.label_status.config(text=f"Au tour de : {self.nom_joueur}", fg=self.color_accent)
+            self.verifier_fin_partie()
 
     def boucle_ia_vs_ia(self):
-        """
-        Simulation du déroulement d'une partie Ordinateur vs Ordinateur.
-        """
-        if self.mode_actuel == 2:
-            # Mesure du temps pour l'indicateur de performance
-            start_time = time.time()
+        """Mode Spectateur : IA Alpha (X) vs IA Beta (O)."""
+        if self.mode_actuel != 2: return
+
+        grille = self.jeu.get_grille()
+        flat_board = [c for row in grille for c in row]
+        
+        if self.tour_ia_vs_ia == "X":
+            # Tour de IA Alpha
+            self.label_status.config(text="IA Alpha (X) réfléchit...", fg=self.color_accent)
+            # Pour Alpha: Elle est X (Max), l'autre est O (Min)
+            cerveau = Evaluation(ai_player="X", human_player="O")
+            idx = cerveau.trouver_meilleur_coup(flat_board)
+            couleur = self.color_accent
+            prochain_tour = "O"
             
-            # Mise à jour visuelle pour montrer que ça "réfléchit"
-            self.label_status.config(text="Analyse de l'IA en cours...", fg=self.color_ia)
+        else:
+            # Tour de IA Beta
+            self.label_status.config(text="IA Beta (O) réfléchit...", fg=self.color_ia)
+            # Pour Beta: Elle est O (Max), l'autre est X (Min)
+            cerveau = Evaluation(ai_player="O", human_player="X")
+            idx = cerveau.trouver_meilleur_coup(flat_board)
+            couleur = self.color_ia
+            prochain_tour = "X"
+
+        # Application du coup
+        if idx != -1:
+            r, c = idx // 3, idx % 3
+            grille[r][c] = self.tour_ia_vs_ia
+            self.boutons[r][c].config(text=self.tour_ia_vs_ia, fg=couleur)
             
-            # TODO: Remplacer ceci par l'appel réel aux algorithmes MinMax des deux IA
+            # Vérif victoire avant de continuer
+            if self.verifier_fin_partie(): return
             
-            # Calcul du temps écoulé en millisecondes
-            perf_ms = (time.time() - start_time) * 1000
-            
-            # Construction du message de fin
-            message = f"MATCH TERMINÉ\n\nVictoire de IA Alpha\nPerformance : {perf_ms:.2f} ms"
-            
-            # Affichage de la popup de fin après un délai de 1.5 secondes pour l'effet visuel
-            self.root.after(1500, lambda: self.afficher_popup_fin(message))
+            # Suite du match
+            self.tour_ia_vs_ia = prochain_tour
+            self.root.after(800, self.boucle_ia_vs_ia)
+
+    # --- POPUP & UTILITAIRES ---
 
     def afficher_popup_fin(self, message_resultat):
-        """
-        Affiche une fenêtre modale (au-dessus du jeu) avec le résultat et les options.
-        """
-        # Toplevel crée une nouvelle fenêtre indépendante de la principale
+        """Affiche le résultat final."""
         popup = tk.Toplevel(self.root)
         popup.title("Fin de partie")
-        popup.geometry("450x420")
         
-        # Calcul pour centrer la popup par rapport à la fenêtre principale
-        main_x = self.root.winfo_x()
-        main_y = self.root.winfo_y()
-        # On décale légèrement (+75, +150) pour l'esthétique
-        popup.geometry(f"+{main_x + 75}+{main_y + 150}")
+        # Centrage popup
+        w, h = 450, 420
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
+        x = (screen_w // 2) - (w // 2)
+        y = (screen_h // 2) - (h // 2)
         
+        popup.geometry(f"{w}x{h}+{x}+{y}")
         popup.configure(bg="#34495e")
-        
-        # grab_set() est crucial : il empêche de cliquer sur la fenêtre principale tant que la popup est ouverte
         popup.grab_set()
 
-        # Affichage du texte de résultat
         tk.Label(popup, text="RÉSULTAT", font=("Helvetica", 14, "bold"), 
                  fg=self.color_accent, bg="#34495e").pack(pady=(30, 10))
         tk.Label(popup, text=message_resultat, font=("Helvetica", 16), 
                  fg="white", bg="#34495e", justify="center").pack(pady=20)
 
-        # Style commun pour les boutons de la popup
         btn_pop = {"font": ("Helvetica", 11, "bold"), "width": 25, "height": 2, "bd": 0, "cursor": "hand2"}
         
-        # Bouton Rejouer : Ferme la popup et relance le jeu
         tk.Button(popup, text="🔄 RELANCER UNE PARTIE", bg=self.color_accent, fg="white",
                   command=lambda: [popup.destroy(), self.lancer_jeu()], **btn_pop).pack(pady=5)
-        
-        # Bouton Menu : Ferme la popup et retourne au menu
         tk.Button(popup, text="🏠 MENU PRINCIPAL", bg="#95a5a6", fg="white",
                   command=lambda: [popup.destroy(), self.afficher_menu()], **btn_pop).pack(pady=5)
-        
-        # Bouton Quitter : Ferme complètement l'application
         tk.Button(popup, text="❌ QUITTER LE JEU", bg="#e74c3c", fg="white",
                   command=self.root.destroy, **btn_pop).pack(pady=5)
-        
-    # --- FONCTION UTILITAIRE DE CENTRAGE ---
+
     def centrer_fenetre(self, w, h):
-        """Calcule proprement la position centrale"""
+        """Centre la fenêtre sur l'écran."""
         ecran_w = self.root.winfo_screenwidth()
         ecran_h = self.root.winfo_screenheight()
         x = (ecran_w // 2) - (w // 2)
