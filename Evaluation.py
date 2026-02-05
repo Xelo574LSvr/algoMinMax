@@ -72,7 +72,7 @@ class Evaluation:
                     best = min(best, val)
             return best
 
-    def trouver_meilleur_coup(self, board):
+    def trouver_meilleur_coup(self, board, depth_limit=9):
         meilleur_score = -float('inf')
         meilleur_coup = -1
 
@@ -83,7 +83,7 @@ class Evaluation:
 
         for coup in coups_possibles:
             board[coup] = self.MAX_PLAYER
-            score = self.minimax(board, 9, False, 9)
+            score = self.minimax(board, 0, False, depth_limit)
             board[coup] = ' '
 
             if score > meilleur_score:

@@ -1,3 +1,4 @@
+import random
 import tkinter as tk
 from tkinter import messagebox
 import time
@@ -200,6 +201,14 @@ class MorpionInterface:
             self.root.after(800, self.jouer_tour_ia_vs_humain)
             
         elif self.mode_actuel == 2:
+            if random.choice([True, False]):
+                self.niveau_x = 9  # X sera Invincible
+                self.niveau_o = 1  # O sera Facile
+                print("Le sort a décidé : X commence et sera FORT")
+            else:
+                self.niveau_x = 1  # X sera Facile
+                self.niveau_o = 9  # O sera Invincible
+                print("Le sort a décidé : X commence et sera FAIBLE")
             # Si c'est IA vs IA, on lance la boucle immédiatement
             self.root.after(800, self.boucle_ia_vs_ia)
 
@@ -251,11 +260,15 @@ class MorpionInterface:
         grille = self.jeu.get_grille()
         flat_board = [c for row in grille for c in row]
 
-        # On détermine qui joue (X ou O)
+        # On détermine qui joue
         joueur_courant = self.tour_ia_vs_ia
         joueur_adverse = "O" if joueur_courant == "X" else "X"
 
-        type_ia_a_utiliser = 1 if joueur_courant == "X" else 2
+        if joueur_courant == "X":
+            niveau = self.niveau_x
+        else:
+            niveau = self.niveau_o
+        type_ia = 1 if joueur_courant == "X" else 2
         
         # Mise à jour texte
         nom_ia = self.nom_ia_x if joueur_courant == "X" else self.nom_ia_o
@@ -263,7 +276,7 @@ class MorpionInterface:
         self.label_status.config(text=f"{nom_ia} ({joueur_courant}) réfléchit...", fg=col)
 
         # On passe le type d'IA à la méthode
-        coord = self.jeu.jouer_coup_ia(joueur_courant, joueur_adverse, type_ia=type_ia_a_utiliser)
+        coord = self.jeu.jouer_coup_ia(joueur_courant, joueur_adverse, type_ia=type_ia, difficulte=niveau)
         
 
         if coord:

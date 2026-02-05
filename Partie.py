@@ -32,7 +32,7 @@ class Partie:
                 return True
         return False
 
-    def jouer_coup_ia(self, symbole_ia, symbole_adversaire, type_ia = 1):
+    def jouer_coup_ia(self, symbole_ia, symbole_adversaire, type_ia = 1, difficulte=9):
         """Demande à l'IA de calculer et jouer le meilleur coup"""
         # 1. Conversion grille 2D -> 1D pour l'IA
         flat_board = [case for ligne in self.__grille for case in ligne]
@@ -43,7 +43,7 @@ class Partie:
         else:
             cerveau = Evaluation(ai_player=symbole_ia, human_player=symbole_adversaire)
         
-        index = cerveau.trouver_meilleur_coup(flat_board)
+        index = cerveau.trouver_meilleur_coup(flat_board, depth_limit=difficulte)
         
         # 3. Application du coup
         if index != -1:
