@@ -85,7 +85,7 @@ class MorpionAlphaBeta:
 
         for coup in coups_possibles:
             board[coup] = self.MAX_PLAYER
-            score = self.minimax(board, 7, False, depth_limit)
+            score = self.minimax(board, 4, False, depth_limit)
             board[coup] = ' '
 
             if score > meilleur_score:
