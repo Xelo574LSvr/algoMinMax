@@ -18,6 +18,8 @@ class MorpionInterface:
         # On stocke tout dans 'self' pour que les variables soient accessibles partout dans la classe.
         
         # Création de la fenêtre principale (la racine)
+        self.niveau_o = None
+        self.niveau_x = None
         self.root = tk.Tk()
         
         # On instancie la logique du jeu (le cerveau qui ne gère pas l'affichage)

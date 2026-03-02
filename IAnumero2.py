@@ -1,7 +1,7 @@
 import sys
 
 
-class MorpionAlphaBeta:
+class IAnumero2:
     def __init__(self, ai_player, human_player):
         self.MAX_PLAYER = ai_player
         self.MIN_PLAYER = human_player
@@ -30,15 +30,11 @@ class MorpionAlphaBeta:
 
             # Pour MAX (IA)
             if nb_max == 3: return 1000
-            if nb_max == 2:
-                score += 50 if tour_a_max else 10
             elif nb_max == 1:
                 score += 1
 
             # Pour MIN (Adversaire)
             if nb_min == 3: return -1000
-            if nb_min == 2:
-                score -= 50 if not tour_a_max else 10
             elif nb_min == 1:
                 score -= 1
 
@@ -85,7 +81,8 @@ class MorpionAlphaBeta:
 
         for coup in coups_possibles:
             board[coup] = self.MAX_PLAYER
-            score = self.minimax(board, 4, False, depth_limit)
+            #La profondeur est égale à 1 afin que l'IA n'anticipe pas le coup suivant
+            score = self.minimax(board, 1, False, depth_limit)
             board[coup] = ' '
 
             if score > meilleur_score:

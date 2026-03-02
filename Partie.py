@@ -1,5 +1,5 @@
 from Evaluation import Evaluation
-from IAnumero2 import MorpionAlphaBeta
+from IAnumero2 import IAnumero2
 import random
 
 class Partie:
@@ -39,7 +39,7 @@ class Partie:
 
         # CHOIX DU CERVEAU SELON LE PARAMÈTRE
         if type_ia == 2:
-            cerveau = MorpionAlphaBeta(ai_player=symbole_ia, human_player=symbole_adversaire)
+            cerveau = IAnumero2(ai_player=symbole_ia, human_player=symbole_adversaire)
         else:
             cerveau = Evaluation(ai_player=symbole_ia, human_player=symbole_adversaire)
         
