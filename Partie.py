@@ -39,6 +39,14 @@ class Partie:
 
         # CHOIX DU CERVEAU SELON LE PARAMÈTRE
         if type_ia == 2:
+            # L'IA à 25% de chances de faire un coup aléatoire
+            if random.random() < 0.25:
+                coups_possibles = [i for i, x in enumerate(flat_board) if x == ' ']
+                index = random.choice(coups_possibles)  # On prend une case vide au hasard
+                r = index // 3
+                c = index % 3
+                self.__grille[r][c] = symbole_ia
+                return r, c
             cerveau = IAnumero2(ai_player=symbole_ia, human_player=symbole_adversaire)
         else:
             cerveau = Evaluation(ai_player=symbole_ia, human_player=symbole_adversaire)

@@ -204,17 +204,16 @@ class MorpionInterface:
             
         elif self.mode_actuel == 2:
             if random.choice([True, False]):
-                self.niveau_x = 9  # X sera Invincible
-                self.niveau_o = 1  # O sera Facile
+                self.niveau_x = 9  # X sera au niveau maximum
                 print("Le sort a décidé : X commence et sera FORT")
             else:
                 self.niveau_x = 1  # X sera Facile
-                self.niveau_o = 9  # O sera Invincible
                 print("Le sort a décidé : X commence et sera FAIBLE")
             # Si c'est IA vs IA, on lance la boucle immédiatement
             self.root.after(800, self.boucle_ia_vs_ia)
+        self.niveau_o = 2
 
-    # --- LOGIQUE DE JEU ---
+        # --- LOGIQUE DE JEU ---
 
     def clic_sur_case(self, r, c):
         """Gère le clic du joueur humain sur une case."""
