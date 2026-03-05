@@ -1,6 +1,6 @@
 import random
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 import time
 from Partie import Partie
 from Evaluation import Evaluation
@@ -28,6 +28,7 @@ class MorpionInterface:
         
         # --- Variables d'état ---
         self.nom_joueur_cache = "Joueur 1"
+        self.stats = {"Alpha": 0, "Beta": 0, "Nuls": 0, "Total": 0}
         
         # Ces variables changent à chaque partie selon le tirage au sort.
         # Elles permettent de savoir qui joue "X" et qui joue "O".
@@ -67,6 +68,13 @@ class MorpionInterface:
         # Le code s'arrête ici tant qu'on ne ferme pas la fenêtre.
         self.root.mainloop()
 
+    def valider_nom(self, texte_futur):
+        """
+        Fonction de rappel pour la validation du champ de saisie du pseudo.
+        Limite la saisie du pseudo à 30 caractères maximum.
+        """
+        return len(texte_futur) <= 30
+
     def nettoyer_interface(self):
         """Supprime tous les widgets de la fenêtre pour changer d'écran."""
         # winfo_children() retourne la liste de tout ce qu'il y a dans la frame (boutons, labels...)
@@ -86,6 +94,9 @@ class MorpionInterface:
     def afficher_menu(self):
         """Affiche les boutons du menu principal."""
         self.nettoyer_interface()
+
+        # Reset des statistiques de simulation à chaque retour au menu principal
+        self.stats = {"Alpha": 0, "Beta": 0, "Nuls": 0, "Total": 0}
         
         # On crée une sous-boîte pour centrer verticalement les boutons
         container = tk.Frame(self.frame_principale, bg=self.color_bg)
@@ -101,6 +112,7 @@ class MorpionInterface:
         # command=... indique quelle fonction appeler quand on clique
         tk.Button(container, text="JOUEUR VS ORDINATEUR", command=self.setup_joueur_vs_ia, **btn_style).pack(pady=15)
         tk.Button(container, text="ORDINATEUR VS ORDINATEUR", command=self.setup_ia_vs_ia, **btn_style).pack(pady=15)
+        tk.Button(container, text="SIMULATION IA VS IA", command=self.simulation_ia_vs_ia, **btn_style).pack(pady=15)
 
     def setup_joueur_vs_ia(self):
         """Affiche le formulaire de saisie du pseudo."""
@@ -110,13 +122,14 @@ class MorpionInterface:
         container.place(relx=0.5, rely=0.5, anchor="center")
         
         tk.Label(container, text="Votre Pseudo", font=("Helvetica", 28, "bold"), fg="white", bg=self.color_bg).pack(pady=(5, 30))
-        
-        # Entry = Champ de saisie texte
-        self.entry_pseudo = tk.Entry(container, font=("Helvetica", 22), justify="center")
+
+        vcmd = (self.root.register(self.valider_nom), '%P')
+
+        self.entry_pseudo = tk.Entry(container, font=("Helvetica", 22), justify="center", validate="key",
+                                     validatecommand=vcmd)
         self.entry_pseudo.pack(pady=10, ipady=10)
-        self.entry_pseudo.insert(0, "Joueur 1") # Texte par défaut
-        
-        # Le bouton appelle 'sauvegarder_et_lancer' pour enregistrer le nom avant de détruire le champ
+        self.entry_pseudo.insert(0, "Joueur 1")
+
         tk.Button(container, text="LANCER", font=self.font_button, bg=self.color_accent, fg="white", width=20, 
                   command=self.sauvegarder_et_lancer).pack(pady=40)
 
@@ -131,6 +144,29 @@ class MorpionInterface:
         """Récupère le texte du champ de saisie avant de lancer le jeu."""
         self.nom_joueur_cache = self.entry_pseudo.get()
         self.lancer_jeu()
+
+    def simulation_ia_vs_ia(self):
+        """Affiche la page de configuration avec un curseur pour le mode Simulation."""
+        self.mode_actuel = 3
+        self.nettoyer_interface()
+
+        container = tk.Frame(self.frame_principale, bg=self.color_bg)
+        container.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(container, text="SIMULATION", font=("Helvetica", 28, "bold"), fg="white", bg=self.color_bg).pack(
+            pady=(0, 20))
+        tk.Label(container, text="Nombre de parties à jouer :", font=("Helvetica", 14), fg="#bdc3c7",
+                 bg=self.color_bg).pack(pady=10)
+
+        self.slider_games = tk.Scale(container, from_=1, to=1000, orient="horizontal", length=400,
+                                     bg=self.color_bg, fg=self.color_accent, troughcolor="#34495e",
+                                     highlightthickness=0, font=("Helvetica", 12, "bold"))
+        self.slider_games.set(10)
+        self.slider_games.pack(pady=20)
+
+        btn_style = {"font": self.font_button, "bg": self.color_accent, "fg": "white", "width": 20, "height": 2,
+                     "bd": 0, "cursor": "hand2"}
+        tk.Button(container, text="LANCER SIMULATION", command=self.lancer_simulation_rapide, **btn_style).pack(pady=30)
 
     # --- CŒUR DU JEU ---
 
@@ -320,6 +356,62 @@ class MorpionInterface:
             
         return False
 
+    def lancer_simulation_rapide(self):
+        """Prépare l'écran d'attente et lance le processus par lots."""
+        self.target_games = self.slider_games.get()
+        self.games_played = 0
+        self.nettoyer_interface()
+
+        container = tk.Frame(self.frame_principale, bg=self.color_bg)
+        container.place(relx=0.5, rely=0.5, anchor="center")
+
+        tk.Label(container, text="CALCUL EN COURS...", font=("Helvetica", 24, "bold"), fg=self.color_accent,
+                 bg=self.color_bg).pack(pady=20)
+        self.lbl_progress = tk.Label(container, text=f"Partie 0 / {self.target_games}", font=("Helvetica", 16),
+                                     fg="white", bg=self.color_bg)
+        self.lbl_progress.pack(pady=10)
+
+        self.progress_bar = ttk.Progressbar(container, orient="horizontal", length=400, mode="determinate")
+        self.progress_bar.pack(pady=20)
+
+        self.root.after(100, self.executer_batch_simulation)
+
+    def executer_batch_simulation(self):
+        """Boucle de simulation exécutée par petits lots pour garder l'interface réactive."""
+        batch_size = 5
+
+        for _ in range(batch_size):
+            if self.games_played >= self.target_games: break
+
+            self.jeu.reinitialiserGrille()
+            self.jeu.choixJoueurDepart()
+
+            j1_commence = self.jeu.get_isTourJoueur()
+            symbole_alpha = "X" if j1_commence else "O"
+            symbole_beta = "O" if j1_commence else "X"
+
+            resultat = self.jeu.simuler_partie_ia_vs_ia(symbole_alpha, symbole_beta)
+
+            if resultat == "Alpha":
+                self.stats["Alpha"] += 1
+            elif resultat == "Beta":
+                self.stats["Beta"] += 1
+            else:
+                self.stats["Nuls"] += 1
+
+            self.games_played += 1
+            self.stats["Total"] += 1
+
+        self.lbl_progress.config(text=f"Partie {self.games_played} / {self.target_games}")
+        self.progress_bar["value"] = (self.games_played / self.target_games) * 100
+
+        self.root.update_idletasks()
+
+        if self.games_played < self.target_games:
+            self.root.after(10, self.executer_batch_simulation)
+        else:
+            self.afficher_popup_fin("SIMULATION TERMINÉE")
+
     def afficher_popup_fin(self, msg):
         """Affiche une fenêtre modale avec le résultat."""
         # Toplevel crée une fenêtre au-dessus de la principale
@@ -335,14 +427,24 @@ class MorpionInterface:
 
         tk.Label(popup, text="RÉSULTAT", font=("Helvetica", 14, "bold"), fg=self.color_accent, bg="#34495e").pack(pady=30)
         tk.Label(popup, text=msg, font=("Helvetica", 16), fg="white", bg="#34495e").pack(pady=20)
+
+        if self.mode_actuel == 3:
+            txt_stats = f"Alpha: {self.stats['Alpha']} | Beta: {self.stats['Beta']} | Nuls: {self.stats['Nuls']}\n(Total: {self.stats['Total']})"
+            tk.Label(popup, text=txt_stats, font=("Helvetica", 12), fg="#bdc3c7", bg="#34495e").pack(pady=(0, 20))
+        else:
+            tk.Label(popup, text="", bg="#34495e").pack(pady=10)
         
         btn_s = {"font": ("Helvetica", 11), "width": 25, "bg": self.color_accent, "fg": "white"}
-        
-        # Le bouton REJOUER relance tout proprement via lancer_jeu
-        tk.Button(popup, text="REJOUER", command=lambda:[popup.destroy(), self.lancer_jeu()], **btn_s).pack(pady=5)
-        
+
+        if self.mode_actuel == 3:
+            cmd_rejouer = lambda: [popup.destroy(), self.simulation_ia_vs_ia()]
+            txt_btn = "NOUVELLE SIMULATION"
+        else:
+            cmd_rejouer = lambda: [popup.destroy(), self.lancer_jeu()]
+            txt_btn = "REJOUER"
+
+        tk.Button(popup, text=txt_btn, command=cmd_rejouer, **btn_s).pack(pady=5)
         btn_s["bg"] = "#95a5a6"
-        tk.Button(popup, text="MENU", command=lambda:[popup.destroy(), self.afficher_menu()], **btn_s).pack(pady=5)
-        
+        tk.Button(popup, text="MENU", command=lambda: [popup.destroy(), self.afficher_menu()], **btn_s).pack(pady=5)
         btn_s["bg"] = "#e74c3c"
         tk.Button(popup, text="QUITTER", command=self.root.destroy, **btn_s).pack(pady=5)

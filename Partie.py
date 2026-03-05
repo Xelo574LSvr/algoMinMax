@@ -77,3 +77,50 @@ class Partie:
 
     def get_grille(self):
         return self.__grille
+
+    def est_match_nul(self):
+        """Vérifie si la grille est complètement remplie sans vainqueur."""
+        for ligne in self.__grille:
+            if " " in ligne:
+                return False  # Il reste une case vide
+        return True  # Aucune case vide trouvée
+
+    def simuler_partie_ia_vs_ia(self, symbole_alpha, symbole_beta):
+        """
+        Joue une partie complète entre IA Alpha (IA 1 : forte) et IA Beta (IA 2 : faible)
+        de manière purement logique et transparente pour l'interface.
+        Retourne le vainqueur ("Alpha", "Beta") ou "Nul".
+        """
+        tour_actuel = "X"  # X commence toujours
+
+        # On instancie les IA une seule fois pour toute la partie
+        cerveau_alpha = Evaluation(ai_player=symbole_alpha, human_player=symbole_beta)
+        cerveau_beta = IAnumero2(ai_player=symbole_beta, human_player=symbole_alpha)
+
+        while True:  # La boucle tourne jusqu'à ce qu'un return l'arrête
+            if self.est_match_nul():
+                return "Nul"
+
+            flat = [case for ligne in self.__grille for case in ligne]
+
+            if tour_actuel == symbole_alpha:
+                idx = cerveau_alpha.trouver_meilleur_coup(flat)
+            else:
+                # 25% de chance de jouer au hasard
+                if random.random() < 0.25:
+                    coups_possibles = [i for i, x in enumerate(flat) if x == ' ']
+                    idx = random.choice(coups_possibles)
+                else:
+                    # 2. Sinon, elle réfléchit mais avec une profondeur limitée à 2 !
+                    idx = cerveau_beta.trouver_meilleur_coup(flat, depth_limit=2)
+
+            if idx != -1:
+                r, c = idx // 3, idx % 3
+                self.jouer_coup(r, c, tour_actuel)
+
+                if self.verifier_victoire(tour_actuel):
+                    return "Alpha" if tour_actuel == symbole_alpha else "Beta"
+
+                tour_actuel = "O" if tour_actuel == "X" else "X"
+            else:
+                return "Nul"
