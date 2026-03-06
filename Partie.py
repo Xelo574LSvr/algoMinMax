@@ -1,5 +1,5 @@
-from Evaluation import Evaluation
-from IAnumero2 import IAnumero2
+from IA import Evaluation
+from IAIntermédiaire import IAnumero2
 import random
 
 class Partie:

@@ -1,9 +1,7 @@
 import random
 import tkinter as tk
-from tkinter import messagebox, ttk
-import time
+from tkinter import ttk
 from Partie import Partie
-from Evaluation import Evaluation
 
 class MorpionInterface:
     """
@@ -247,7 +245,7 @@ class MorpionInterface:
                 print("Le sort a décidé : X commence et sera FAIBLE")
             # Si c'est IA vs IA, on lance la boucle immédiatement
             self.root.after(800, self.boucle_ia_vs_ia)
-        self.niveau_o = 2
+        self.niveau_o = 2  # On veut que l'IA rond soit toujours intermédiaire
 
         # --- LOGIQUE DE JEU ---
 

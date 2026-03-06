@@ -1,17 +1,13 @@
-import sys
+class Evaluation:
 
-
-class IAnumero2:
     def __init__(self, ai_player, human_player):
         self.MAX_PLAYER = ai_player
         self.MIN_PLAYER = human_player
 
-
     def est_plein(self, board):
         return ' ' not in board
 
-        # --- Permet d'évaluer l'état de jeu ---
-
+    # --- Permet d'évaluer l'état de jeu ---
     def evaluer_etat(self, board):
         score = 0
         lignes = [(0, 1, 2), (3, 4, 5), (6, 7, 8), (0, 3, 6), (1, 4, 7), (2, 5, 8), (0, 4, 8), (2, 4, 6)]
@@ -30,18 +26,21 @@ class IAnumero2:
 
             # Pour MAX (IA)
             if nb_max == 3: return 1000
+            if nb_max == 2:
+                score += 50 if tour_a_max else 10
             elif nb_max == 1:
                 score += 1
 
             # Pour MIN (Adversaire)
             if nb_min == 3: return -1000
+            if nb_min == 2:
+                score -= 50 if not tour_a_max else 10
             elif nb_min == 1:
                 score -= 1
 
         return score
 
-        # --- Algorithme min max ---
-
+    # --- Algorithme min max ---
     def minimax(self, board, profondeur, is_max, depth_limit):
         score = self.evaluer_etat(board)
         if score == 1000: return 1000 - profondeur
@@ -70,19 +69,15 @@ class IAnumero2:
                     best = min(best, val)
             return best
 
-    def trouver_meilleur_coup(self, board,depth_limit=9):
+    def trouver_meilleur_coup(self, board, depth_limit=9):
         meilleur_score = -float('inf')
         meilleur_coup = -1
 
         coups_possibles = [i for i, x in enumerate(board) if x == ' ']
 
-        # Petit message console optionnel
-        # print(f"L'IA ({self.MAX_PLAYER}) réfléchit ({len(coups_possibles)} options)...")
-
         for coup in coups_possibles:
             board[coup] = self.MAX_PLAYER
-            #La profondeur est égale à 1 afin que l'IA n'anticipe pas le coup suivant
-            score = self.minimax(board, 1, False, depth_limit)
+            score = self.minimax(board, 0, False, depth_limit)
             board[coup] = ' '
 
             if score > meilleur_score:
