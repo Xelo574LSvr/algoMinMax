@@ -23,7 +23,7 @@ class MorpionInterface:
         # On instancie la logique du jeu (le cerveau qui ne gère pas l'affichage)
         self.jeu = Partie()
         self.mode_actuel = None
-        
+
         # --- Variables d'état ---
         self.nom_joueur_cache = "Joueur 1"
         self.stats = {"Alpha": 0, "Beta": 0, "Nuls": 0, "Total": 0}
@@ -359,6 +359,7 @@ class MorpionInterface:
         self.target_games = self.slider_games.get()
         self.games_played = 0
         self.nettoyer_interface()
+        self.stats = {"Alpha": 0, "Beta": 0, "Nuls": 0, "Total": 0}
 
         container = tk.Frame(self.frame_principale, bg=self.color_bg)
         container.place(relx=0.5, rely=0.5, anchor="center")
